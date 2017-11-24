@@ -1,7 +1,7 @@
 package tourguide;
 
 public class Library {
-	public void addTour(String id, String title, Note note, Tour tour){
+	public void addTour(String id, String title, Annotation note, Tour tour){
 		
 	}
 }

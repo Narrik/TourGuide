@@ -1,10 +1,10 @@
 package tourguide;
 
 public class Waypoint {
-	Note note;
+	Annotation note;
 	
 	public boolean near(Location location) {
-		
+		return false;
 	}
 	
 }
