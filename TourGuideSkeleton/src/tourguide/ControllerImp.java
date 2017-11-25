@@ -29,7 +29,7 @@ public class ControllerImp implements Controller {
     
     public ControllerImp(double waypointRadius, double waypointSeparation) {
         this.waypointRadius = waypointRadius;
-        this.waypointSeparation = waypointSeparation;
+        this.waypointSeparation = waypointSeparation;     
     }
 
     //--------------------------
@@ -118,10 +118,13 @@ public class ControllerImp implements Controller {
     //--------------------------
     @Override
     public void setLocation(double easting, double northing) {
+    	loc = new Location(easting, northing);
     }
 
     @Override
     public List<Chunk> getOutput() {
+    	List<Chunk> chunk_list = new ArrayList<Chunk>();
+    	
         return new ArrayList<Chunk>();
     }
 

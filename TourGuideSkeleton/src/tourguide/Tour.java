@@ -6,6 +6,7 @@ public class Tour {
 	public String id;
 	public String title;
 	public Annotation annotation;
+	public Integer currStage;
 	public LinkedList<Waypoint> waypoints;
     public LinkedList<Leg> legs;
 
