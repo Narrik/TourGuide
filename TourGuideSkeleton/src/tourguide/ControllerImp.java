@@ -20,6 +20,10 @@ public class ControllerImp implements Controller {
                 + "MESSAGE: " + messageName + LS
                 + "-------------------------------------------------------------";
     }
+
+    public Mode mode;
+    public Tour tour;
+    public Location location;
     
     public ControllerImp(double waypointRadius, double waypointSeparation) {
     }
@@ -34,19 +38,40 @@ public class ControllerImp implements Controller {
     @Override
     public Status startNewTour(String id, String title, Annotation annotation) {
         logger.fine(startBanner("startNewTour"));
-        return new Status.Error("unimplemented");
+        if (mode == Mode.BrowseTours){
+            tour = new Tour(id,title,annotation);
+            mode = Mode.CreateTour;
+            return Status.OK;
+        }
+        return new Status.Error("Cannot start a new tour while not in browse tours mode");
     }
 
     @Override
     public Status addWaypoint(Annotation annotation) {
         logger.fine(startBanner("addWaypoint"));
-        return new Status.Error("unimplemented");
+        if (mode == Mode.CreateTour) {
+            if (tour.getNumberOfWaypoints() > tour.getNumberOfLegs()){
+                tour.addLeg(Annotation.getDefault());
+            }
+            tour.addWaypoint(location,annotation);
+            return Status.OK;
+        }
+        return new Status.Error("Cannot add a waypoint while not in create tour mode");
     }
 
     @Override
     public Status addLeg(Annotation annotation) {
         logger.fine(startBanner("addLeg"));
-        return new Status.Error("unimplemented");
+        if (mode == Mode.CreateTour){
+            if (tour.getNumberOfWaypoints() > tour.getNumberOfLegs()) {
+                tour.addLeg(annotation);
+                return Status.OK;
+            } else {
+                return new Status.Error("Cannot add more than one leg to a waypoint");
+            }
+
+        }
+        return new Status.Error("Cannot add a leg while not in create tour mode");
     }
 
     @Override
