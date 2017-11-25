@@ -22,5 +22,13 @@ public class DisplacementTest {
         double bearing = new Displacement(0.0, 1.0).bearing();
         assertEquals(0.0, bearing, EPS);
     }
+    
+    
+    @Test
+    public void testEastBearing() {
+        double bearing = new Displacement(0.0, 1.0).bearing();
+        assertEquals(0.0, bearing, EPS);
+    }
+ 
  
 }
