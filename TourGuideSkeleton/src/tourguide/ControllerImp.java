@@ -2,10 +2,12 @@
  * 
  */
 package tourguide;
-
+import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import tourguide.Chunk.CreateHeader;
 
 /**
  * @author pbj
@@ -24,6 +26,9 @@ public class ControllerImp implements Controller {
     public Mode mode;
     public Tour tour;
     public Location loc;
+    public Displacement disp;
+    public Library lib;
+    public int step;
     public double waypointRadius;
     public double waypointSeparation;
     
@@ -124,8 +129,26 @@ public class ControllerImp implements Controller {
     @Override
     public List<Chunk> getOutput() {
     	List<Chunk> chunk_list = new ArrayList<Chunk>();
-    	
-        return new ArrayList<Chunk>();
+    	if (mode == Mode.CreateTour) {
+    		chunk_list.add(new Chunk.CreateHeader(tour.id, tour.getNumberOfWaypoints(), tour.getNumberOfLegs()));
+    	}
+    	if (mode == Mode.FollowTour) {
+    		chunk_list.add(new Chunk.FollowHeader(tour.title, tour.currStage, tour.getNumberOfWaypoints()));
+    		chunk_list.add(new Chunk.FollowWaypoint(tour.getWaypoint(step).note));
+    		chunk_list.add(new Chunk.FollowLeg(tour.getLeg(step).note));
+    		chunk_list.add(new Chunk.FollowBearing(disp.bearing(), disp.distance()));
+    	}
+    	if (mode == Mode.BrowseTours) {
+    		LinkedHashMap<String,Tour> tour_lib = new LinkedHashMap<String,Tour>();
+    		tour_lib = lib.get_tour_lib();
+    		Chunk.BrowseOverview browse_tours = new Chunk.BrowseOverview();
+    		for(Map.Entry<String, Tour> entry: tour_lib.entrySet()) {
+    			browse_tours.addIdAndTitle(entry.getKey(), entry.getValue().title);
+    		}
+    		chunk_list.add(browse_tours);
+    		chunk_list.add(new Chunk.BrowseDetails(tour.id, tour.title, tour.annotation));
+    	}
+        return chunk_list;
     }
 
 
