@@ -23,9 +23,13 @@ public class ControllerImp implements Controller {
 
     public Mode mode;
     public Tour tour;
-    public Location location;
+    public Location loc;
+    public double waypointRadius;
+    public double waypointSeparation;
     
     public ControllerImp(double waypointRadius, double waypointSeparation) {
+        this.waypointRadius = waypointRadius;
+        this.waypointSeparation = waypointSeparation;
     }
 
     //--------------------------
@@ -47,13 +51,13 @@ public class ControllerImp implements Controller {
     }
 
     @Override
-    public Status addWaypoint(Annotation annotation) {
+    public Status addWaypoint(Annotation ann) {
         logger.fine(startBanner("addWaypoint"));
         if (mode == Mode.CreateTour) {
             if (tour.getNumberOfWaypoints() > tour.getNumberOfLegs()){
                 tour.addLeg(Annotation.getDefault());
             }
-            tour.addWaypoint(location,annotation);
+            tour.addWaypoint(ann,waypointRadius,loc);
             return Status.OK;
         }
         return new Status.Error("Cannot add a waypoint while not in create tour mode");
@@ -77,6 +81,7 @@ public class ControllerImp implements Controller {
     @Override
     public Status endNewTour() {
         logger.fine(startBanner("endNewTour"));
+
         return new Status.Error("unimplemented");
     }
 

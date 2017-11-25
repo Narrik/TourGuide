@@ -17,8 +17,8 @@ public class Tour {
         this.legs = new LinkedList<Leg>();
 
 	}
-	public void addWaypoint(Location location, Annotation annotation) {
-		waypoints.add(new Waypoint(location,annotation));
+	public void addWaypoint (Annotation ann, double waypointRadius, Location loc) {
+		waypoints.add(new Waypoint(ann, waypointRadius, loc));
 	}
 	
 	public void addLeg(Annotation annotation) {
