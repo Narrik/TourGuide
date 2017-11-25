@@ -35,9 +35,10 @@ public class DisplacementTest {
         double distance1 = new Displacement(0.0, 1.0).distance();
         double distance2 = new Displacement(4.0, -3.0).distance();
         double distance3 = new Displacement(-3.0, 4.0).distance();
-        assertEquals(1.0, distance1, EPS);
-        assertEquals(5.0, distance2, EPS);
-        assertEquals(5.0, distance3, EPS);
+        double distance4 = new Displacement(1.0, 0.0).distance();
+        assertEquals(distance4, distance1, EPS);
+        assertEquals(distance3 , distance2, EPS);
+ 
     }
     
     
