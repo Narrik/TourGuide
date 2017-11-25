@@ -26,6 +26,8 @@ public class ControllerImp implements Controller {
     public Location loc;
     public double waypointRadius;
     public double waypointSeparation;
+    public Waypoint 
+    public Library lib;
     
     public ControllerImp(double waypointRadius, double waypointSeparation) {
         this.waypointRadius = waypointRadius;
@@ -81,8 +83,18 @@ public class ControllerImp implements Controller {
     @Override
     public Status endNewTour() {
         logger.fine(startBanner("endNewTour"));
-
-        return new Status.Error("unimplemented");
+        if (mode == Mode.CreateTour){
+            if (tour.getNumberOfWaypoints() > tour.getNumberOfLegs()){
+                lib.addTour(tour);
+                return Status.OK;
+            }
+            if (tour.getNumberOfWaypoints() == 0)
+                return new Status.Error("Must add at least one waypoint to create a tour");
+            }
+            else {
+                return new Status.Error("Tour must have more waypoints than legs");
+            }
+        return new Status.Error("Cannot end a tour while not in create tour mode");
     }
 
     //--------------------------
@@ -91,11 +103,13 @@ public class ControllerImp implements Controller {
 
     @Override
     public Status showTourDetails(String tourID) {
+
         return new Status.Error("unimplemented");
     }
   
     @Override
     public Status showToursOverview() {
+
         return new Status.Error("unimplemented");
     }
 
@@ -118,6 +132,7 @@ public class ControllerImp implements Controller {
     //--------------------------
     @Override
     public void setLocation(double easting, double northing) {
+        loc = new Location(easting,northing);
     }
 
     @Override
