@@ -35,6 +35,9 @@ public class ControllerImp implements Controller {
     public String browseDetailsTourId;
     
     public ControllerImp(double waypointRadius, double waypointSeparation) {
+        this.mode = Mode.BrowseTours;
+        this.stage = 0;
+        this.browseDetails = false;
         this.waypointRadius = waypointRadius;
         this.waypointSeparation = waypointSeparation;     
     }
@@ -89,13 +92,13 @@ public class ControllerImp implements Controller {
     public Status endNewTour() {
         logger.fine(startBanner("endNewTour"));
         if (mode == Mode.CreateTour){
+            if (tour.getNumberOfWaypoints() == 0)
+                return new Status.Error("Must add at least one waypoint to create a tour");
+            }
             if (tour.getNumberOfWaypoints() > tour.getNumberOfLegs()){
                 lib.addTour(tour);
                 mode = Mode.BrowseTours;
                 return Status.OK;
-            }
-            if (tour.getNumberOfWaypoints() == 0)
-                return new Status.Error("Must add at least one waypoint to create a tour");
             }
             else {
                 return new Status.Error("A tour must have more waypoints than legs");
