@@ -32,6 +32,7 @@ public class ControllerImp implements Controller {
     public double waypointSeparation;
     public Library lib;
     public boolean browseDetails;
+    public Waypoint currWaypoint;
     
     public ControllerImp(double waypointRadius, double waypointSeparation) {
         this.lib = new Library();
@@ -64,10 +65,14 @@ public class ControllerImp implements Controller {
     public Status addWaypoint(Annotation ann) {
         logger.fine(startBanner("addWaypoint"));
         if (mode == Mode.CreateTour) {
+            if (tour.getNumberOfWaypoints() > 0 && (loc.deltaFrom(currWaypoint.location).distance()) <= waypointSeparation) {
+                return new Status.Error("Cannot add adjacent waypoints so close together");
+            }
             if (tour.getNumberOfWaypoints() == tour.getNumberOfLegs()){
                 tour.addLeg(Annotation.getDefault());
             }
             tour.addWaypoint(ann,waypointRadius,loc);
+            currWaypoint = tour.getWaypoint(tour.getNumberOfWaypoints()-1);
             return Status.OK;
         }
         return new Status.Error("Cannot add a waypoint while not in create tour mode");
@@ -154,15 +159,6 @@ public class ControllerImp implements Controller {
             }
             mode = Mode.FollowTour;
             tour = lib.get_tour_lib().get(id);
-            /*while (mode == Mode.FollowTour) {
-                if ((tour.getWaypoint(stage).near(loc))) {
-                    // if we are near the next waypoint
-                    if ((tour.getNumberOfWaypoints() >= stage)) {
-                        // and not already at the last waypoint, increase ou
-                        stage++;
-                    }
-                }
-            }*/
             return Status.OK;
         }
         return new Status.Error("Cannot start following a tour while not in browse tours mode");
@@ -182,7 +178,19 @@ public class ControllerImp implements Controller {
     //--------------------------
     @Override
     public void setLocation(double easting, double northing) {
-    	loc = new Location(easting, northing);
+        loc = new Location(easting, northing);
+        if (mode == Mode.FollowTour) {
+            if (stage < tour.getNumberOfWaypoints()) {
+                // if we are not at the last stage
+                if (tour.getWaypoint(stage).near(loc)) {
+                    // if we are near the next waypoint, increase stage
+                    stage++;
+                }
+            }
+            if (stage < tour.getNumberOfWaypoints()) {
+                disp = loc.deltaFrom(tour.getWaypoint(stage).location);
+            }
+        }
     }
 
     @Override
@@ -195,9 +203,18 @@ public class ControllerImp implements Controller {
     	if (mode == Mode.FollowTour) {
             logger.fine(startBanner("getOutputFollowTour"));
     		chunk_list.add(new Chunk.FollowHeader(tour.title, stage, tour.getNumberOfWaypoints()));
-    		chunk_list.add(new Chunk.FollowWaypoint(tour.getWaypoint(stage).note));
-    		chunk_list.add(new Chunk.FollowLeg(tour.getLeg(stage).note));
-    		chunk_list.add(new Chunk.FollowBearing(disp.bearing(), disp.distance()));
+    		if (stage != 0) {
+                if (tour.getWaypoint(stage - 1).near(loc)) {
+                    // if we are near a waypoint, get information for waypoint
+                    chunk_list.add(new Chunk.FollowWaypoint(tour.getWaypoint(stage - 1).note));
+                }
+            }
+            if (stage < tour.getNumberOfWaypoints()) {
+                // if we are not at the last stage
+                chunk_list.add(new Chunk.FollowLeg(tour.getLeg(stage).note));
+                chunk_list.add(new Chunk.FollowBearing(disp.bearing(), disp.distance()));
+            }
+
     	}
     	if (mode == Mode.BrowseTours) {
     		LinkedHashMap<String,Tour> tour_lib;

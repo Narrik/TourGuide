@@ -8,9 +8,9 @@ public class Location {
 		northing = n;
 	}
 	public Displacement deltaFrom(Location location) {
-		easting = location.easting - this.easting;
-		northing = location.northing - this.northing;
-		Displacement disp = new Displacement(easting,northing);
+		double east = location.easting - this.easting;
+		double north = location.northing - this.northing;
+		Displacement disp = new Displacement(east,north);
 		return disp;
 		
 	}

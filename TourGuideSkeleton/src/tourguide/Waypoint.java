@@ -9,8 +9,8 @@ public class Waypoint {
 		radius = r;
 		note = n;
 	}
-	public boolean near(Location location) {
-		return radius <= this.location.deltaFrom(location).distance();
+	public boolean near(Location loc) {
+		return (this.location.deltaFrom(loc).distance() <= radius);
 	}
 	
 }

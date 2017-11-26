@@ -25,13 +25,12 @@ public class Tour {
 		legs.add(new Leg(annotation));
 	}
 	
-	public Waypoint getWaypoint(int step) {
-        return waypoints.get(step);
+	public Waypoint getWaypoint(int stage) {
+        return waypoints.get(stage);
 	}
 
-	public Leg getLeg(int step) {
-        return legs.get(step);
-
+	public Leg getLeg(int stage) {
+		return legs.get(stage);
 	}
 
 	public int getNumberOfWaypoints(){
