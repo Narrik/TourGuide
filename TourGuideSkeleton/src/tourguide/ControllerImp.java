@@ -64,7 +64,7 @@ public class ControllerImp implements Controller {
     public Status addWaypoint(Annotation ann) {
         logger.fine(startBanner("addWaypoint"));
         if (mode == Mode.CreateTour) {
-            if (tour.getNumberOfWaypoints() > tour.getNumberOfLegs()){
+            if (tour.getNumberOfWaypoints() == tour.getNumberOfLegs()){
                 tour.addLeg(Annotation.getDefault());
             }
             tour.addWaypoint(ann,waypointRadius,loc);
@@ -77,7 +77,7 @@ public class ControllerImp implements Controller {
     public Status addLeg(Annotation annotation) {
         logger.fine(startBanner("addLeg"));
         if (mode == Mode.CreateTour){
-            if (tour.getNumberOfWaypoints() > tour.getNumberOfLegs()) {
+            if (tour.getNumberOfWaypoints() == tour.getNumberOfLegs()) {
                 tour.addLeg(annotation);
                 return Status.OK;
             } else {
@@ -91,18 +91,18 @@ public class ControllerImp implements Controller {
     @Override
     public Status endNewTour() {
         logger.fine(startBanner("endNewTour"));
-        if (mode == Mode.CreateTour){
-            if (tour.getNumberOfWaypoints() == 0)
+        if (mode == Mode.CreateTour) {
+            if (tour.getNumberOfWaypoints() == 0) {
                 return new Status.Error("Must add at least one waypoint to create a tour");
             }
-            if (tour.getNumberOfWaypoints() > tour.getNumberOfLegs()){
+            if (tour.getNumberOfWaypoints() == tour.getNumberOfLegs()) {
                 lib.addTour(tour);
                 mode = Mode.BrowseTours;
                 return Status.OK;
+            } else {
+                return new Status.Error("A tour must the same amount of waypoints than legs");
             }
-            else {
-                return new Status.Error("A tour must have more waypoints than legs");
-            }
+        }
         return new Status.Error("Cannot end a tour while not in create tour mode");
     }
 
@@ -147,15 +147,15 @@ public class ControllerImp implements Controller {
     @Override
     public Status followTour(String id) {
         if (mode == Mode.BrowseTours) {
-            if (id != browseDetailsTourId) {
+            if (!(id.equals(browseDetailsTourId))) {
                 return new Status.Error("Cannot start following a tour without viewing its details first");
             }
             mode = Mode.FollowTour;
             tour = lib.get_tour_lib().get(id);
             while (mode == Mode.FollowTour) {
-                if ((tour.getWaypoint(stage + 1).near(loc))) {
+                if ((tour.getWaypoint(stage).near(loc))) {
                     // if we are near the next waypoint
-                    if ((tour.getNumberOfWaypoints() > stage)) {
+                    if ((tour.getNumberOfWaypoints() >= stage)) {
                         // and not already at the last waypoint, increase ou
                         stage++;
                     }
@@ -187,16 +187,16 @@ public class ControllerImp implements Controller {
     public List<Chunk> getOutput() {
     	List<Chunk> chunk_list = new ArrayList<Chunk>();
     	if (mode == Mode.CreateTour) {
-    		chunk_list.add(new Chunk.CreateHeader(tour.id, tour.getNumberOfWaypoints(), tour.getNumberOfLegs()));
+    		chunk_list.add(new Chunk.CreateHeader(tour.title, tour.getNumberOfLegs(), tour.getNumberOfWaypoints()));
     	}
     	if (mode == Mode.FollowTour) {
-    		chunk_list.add(new Chunk.FollowHeader(tour.title, tour.currStage, tour.getNumberOfWaypoints()));
+    		chunk_list.add(new Chunk.FollowHeader(tour.title, stage, tour.getNumberOfWaypoints()));
     		chunk_list.add(new Chunk.FollowWaypoint(tour.getWaypoint(stage).note));
     		chunk_list.add(new Chunk.FollowLeg(tour.getLeg(stage).note));
     		chunk_list.add(new Chunk.FollowBearing(disp.bearing(), disp.distance()));
     	}
     	if (mode == Mode.BrowseTours) {
-    		LinkedHashMap<String,Tour> tour_lib = new LinkedHashMap<String,Tour>();
+    		LinkedHashMap<String,Tour> tour_lib;
     		tour_lib = lib.get_tour_lib();
     		Chunk.BrowseOverview browse_tours = new Chunk.BrowseOverview();
     		for(Map.Entry<String, Tour> entry: tour_lib.entrySet()) {
