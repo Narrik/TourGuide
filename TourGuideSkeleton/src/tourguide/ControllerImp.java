@@ -115,6 +115,9 @@ public class ControllerImp implements Controller {
         logger.fine(startBanner("showTourDetails"));
         if (mode == Mode.BrowseTours) {
             if (!browseDetails) {
+                if (!lib.get_tour_lib().containsKey(tourID)){
+                    return new Status.Error("Tour not found");
+                }
                 browseDetails = true;
                 browseDetailsTourId = tourID;
                 return Status.OK;
