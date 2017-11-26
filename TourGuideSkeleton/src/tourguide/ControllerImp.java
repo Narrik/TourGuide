@@ -115,10 +115,8 @@ public class ControllerImp implements Controller {
         logger.fine(startBanner("showTourDetails"));
         if (mode == Mode.BrowseTours) {
             if (!browseDetails) {
-                if (!lib.get_tour_lib().containsKey(tourID)){
-                    return new Status.Error("Tour not found");
-                }
                 browseDetails = true;
+                tour = lib.get_tour_lib().get(tourID);
                 browseDetailsTourId = tourID;
                 return Status.OK;
             } else {
@@ -201,14 +199,18 @@ public class ControllerImp implements Controller {
     	if (mode == Mode.BrowseTours) {
     		LinkedHashMap<String,Tour> tour_lib;
     		tour_lib = lib.get_tour_lib();
-    		Chunk.BrowseOverview browse_tours = new Chunk.BrowseOverview();
-    		for(Map.Entry<String, Tour> entry: tour_lib.entrySet()) {
-    			browse_tours.addIdAndTitle(entry.getKey(), entry.getValue().title);
+    		if (browseDetails != true) {
+    			Chunk.BrowseOverview browse_tours = new Chunk.BrowseOverview();
+        		for(Map.Entry<String, Tour> entry: tour_lib.entrySet()) {
+        			browse_tours.addIdAndTitle(entry.getKey(), entry.getValue().title);
+        		}
+        		chunk_list.add(browse_tours);
     		}
-    		chunk_list.add(browse_tours);
-    		chunk_list.add(new Chunk.BrowseDetails(tour.id, tour.title, tour.annotation));
+    		else {
+    			chunk_list.add(new Chunk.BrowseDetails(tour.id, tour.title, tour.annotation));
+    		}
     	}
-        return chunk_list;
+    return chunk_list;
     }
 
 
