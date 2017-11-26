@@ -103,6 +103,7 @@ public class ControllerImp implements Controller {
             if (tour.getNumberOfWaypoints() == tour.getNumberOfLegs()) {
                 lib.addTour(tour);
                 mode = Mode.BrowseTours;
+                browseDetails = false;
                 return Status.OK;
             } else {
                 return new Status.Error("A tour must the same amount of waypoints than legs");
