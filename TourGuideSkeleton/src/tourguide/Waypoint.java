@@ -2,15 +2,15 @@ package tourguide;
 
 public class Waypoint {
 	Annotation note;
-	Location currWayp;
+	Location location;
 	double radius; 
 	Waypoint(Annotation n, double r, Location loc){
-		currWayp = loc;
+		location = loc;
 		radius = r;
 		note = n;
 	}
 	public boolean near(Location location) {
-		return radius <= location.deltaFrom(location, currWayp).distance(); 
+		return radius <= this.location.deltaFrom(location).distance();
 	}
 	
 }

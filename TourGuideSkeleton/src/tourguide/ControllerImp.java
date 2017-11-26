@@ -27,12 +27,12 @@ public class ControllerImp implements Controller {
     public Tour tour;
     public Location loc;
     public Displacement disp;
-    public Library lib;
-    public int step;
+    public int stage;
     public double waypointRadius;
     public double waypointSeparation;
-    public Waypoint currWaypoint;
     public Library lib;
+    public boolean browseDetails;
+    public String browseDetailsTourId;
     
     public ControllerImp(double waypointRadius, double waypointSeparation) {
         this.waypointRadius = waypointRadius;
@@ -49,12 +49,12 @@ public class ControllerImp implements Controller {
     @Override
     public Status startNewTour(String id, String title, Annotation annotation) {
         logger.fine(startBanner("startNewTour"));
-        if (mode == Mode.BrowseTours){
-            tour = new Tour(id,title,annotation);
+        if (mode == Mode.BrowseTours && !browseDetails){
             mode = Mode.CreateTour;
+            tour = new Tour(id,title,annotation);
             return Status.OK;
         }
-        return new Status.Error("Cannot start a new tour while not in browse tours mode");
+        return new Status.Error("Cannot start a new tour while not in tour overview");
     }
 
     @Override
@@ -91,13 +91,14 @@ public class ControllerImp implements Controller {
         if (mode == Mode.CreateTour){
             if (tour.getNumberOfWaypoints() > tour.getNumberOfLegs()){
                 lib.addTour(tour);
+                mode = Mode.BrowseTours;
                 return Status.OK;
             }
             if (tour.getNumberOfWaypoints() == 0)
                 return new Status.Error("Must add at least one waypoint to create a tour");
             }
             else {
-                return new Status.Error("Tour must have more waypoints than legs");
+                return new Status.Error("A tour must have more waypoints than legs");
             }
         return new Status.Error("Cannot end a tour while not in create tour mode");
     }
@@ -108,14 +109,32 @@ public class ControllerImp implements Controller {
 
     @Override
     public Status showTourDetails(String tourID) {
-
-        return new Status.Error("unimplemented");
+        logger.fine(startBanner("showTourDetails"));
+        if (mode == Mode.BrowseTours) {
+            if (!browseDetails) {
+                browseDetails = true;
+                browseDetailsTourId = tourID;
+                return Status.OK;
+            } else {
+                return new Status.Error("Already browsing details of a tour");
+            }
+        }
+        return new Status.Error("Cannot view details of a tour while not in browse tours mode");
     }
   
     @Override
     public Status showToursOverview() {
-
-        return new Status.Error("unimplemented");
+        logger.fine(startBanner("showToursOverview"));
+        if (mode == Mode.BrowseTours){
+                if (browseDetails){
+                    browseDetails = false;
+                    browseDetailsTourId = "";
+                    return Status.OK;
+                } else {
+                    return new Status.Error("Already in tour overview");
+                }
+            }
+        return new Status.Error("Cannot view tour overview while not in browse tours mode");
     }
 
     //--------------------------
@@ -124,12 +143,33 @@ public class ControllerImp implements Controller {
     
     @Override
     public Status followTour(String id) {
-        return new Status.Error("unimplemented");
+        if (mode == Mode.BrowseTours) {
+            if (id != browseDetailsTourId) {
+                return new Status.Error("Cannot start following a tour without viewing its details first");
+            }
+            mode = Mode.FollowTour;
+            tour = lib.get_tour_lib().get(id);
+            while (mode == Mode.FollowTour) {
+                if ((tour.getWaypoint(stage + 1).near(loc))) {
+                    // if we are near the next waypoint
+                    if ((tour.getNumberOfWaypoints() > stage)) {
+                        // and not already at the last waypoint, increase ou
+                        stage++;
+                    }
+                }
+            }
+            return Status.OK;
+        }
+        return new Status.Error("Cannot start following a tour while not in browse tours mode");
     }
-
     @Override
     public Status endSelectedTour() {
-        return new Status.Error("unimplemented");
+        if (mode == Mode.FollowTour){
+            mode = Mode.BrowseTours;
+            browseDetails = false;
+            return Status.OK;
+        }
+        return new Status.Error("Cannot stop following a tour while not in follow tour mode");
     }
 
     //--------------------------
@@ -148,8 +188,8 @@ public class ControllerImp implements Controller {
     	}
     	if (mode == Mode.FollowTour) {
     		chunk_list.add(new Chunk.FollowHeader(tour.title, tour.currStage, tour.getNumberOfWaypoints()));
-    		chunk_list.add(new Chunk.FollowWaypoint(tour.getWaypoint(step).note));
-    		chunk_list.add(new Chunk.FollowLeg(tour.getLeg(step).note));
+    		chunk_list.add(new Chunk.FollowWaypoint(tour.getWaypoint(stage).note));
+    		chunk_list.add(new Chunk.FollowLeg(tour.getLeg(stage).note));
     		chunk_list.add(new Chunk.FollowBearing(disp.bearing(), disp.distance()));
     	}
     	if (mode == Mode.BrowseTours) {

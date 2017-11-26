@@ -7,9 +7,9 @@ public class Location {
 		easting = e;
 		northing = n;
 	}
-	public Displacement deltaFrom(Location location, Location currWayp) {
-		easting = currWayp.easting - location.easting;
-		northing = currWayp.northing - location.northing;
+	public Displacement deltaFrom(Location location) {
+		easting = location.easting - this.easting;
+		northing = location.northing - this.northing;
 		Displacement disp = new Displacement(easting,northing);
 		return disp;
 		
