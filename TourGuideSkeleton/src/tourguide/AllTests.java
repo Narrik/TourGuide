@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package tourguide;
 
@@ -15,21 +15,20 @@ import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * @author pbj
- *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ DisplacementTest.class, ControllerTest.class })
+@SuiteClasses({DisplacementTest.class, ControllerTest.class})
 public class AllTests {
 
     public static void main(String[] args) {
-        if (args.length >= 2){
+        if (args.length >= 2) {
             System.err.println("Unrecognised arguments");
             return;
-        }  else if (args.length == 1) {
+        } else if (args.length == 1) {
             String loggingLevel = args[0];
             if (loggingLevel.equals("off")) {
                 ControllerTest.loggingLevel = Level.OFF;
-           } else if (loggingLevel.equals("info")) {
+            } else if (loggingLevel.equals("info")) {
                 ControllerTest.loggingLevel = Level.INFO;
             } else if (loggingLevel.equals("fine")) {
                 ControllerTest.loggingLevel = Level.FINE;
@@ -39,7 +38,7 @@ public class AllTests {
                 System.err.println("Unrecognised logging level argument: " + loggingLevel);
                 return;
             }
-         } 
+        }
         runJUnitTests();
     }
 
@@ -55,8 +54,8 @@ public class AllTests {
             System.out.println("Number of failed tests: " + result.getFailureCount());
             for (Failure failure : result.getFailures()) {
                 System.out.println(failure.toString());
-            }  
-        } 
+            }
+        }
     }
 
 

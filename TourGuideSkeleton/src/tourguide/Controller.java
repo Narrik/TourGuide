@@ -14,7 +14,7 @@ public interface Controller {
     Status addLeg(Annotation annotation);
 
     Status endNewTour();
-    
+
     /*
      * Browse tours mode
      */
