@@ -229,4 +229,133 @@ public class ControllerTest {
     
     }
     
+    @Test
+    public void testTwoWaypointsClose() {
+    	//JUnit test to check if Status raises an error when two waypoints are too close
+    	logger.info(makeBanner("TwoWaypointsClose"));
+    	
+    	 checkStatus(
+                 controller.startNewTour("T3", "Old Town", ann("From Edinburgh Castle to Holyrood\n"))
+                 );
+         
+         checkOutput(1, 0, new Chunk.CreateHeader("Old Town", 0,  0));
+       
+         controller.setLocation(0, 1);
+         
+         // Leg before this waypoint with default annotation added at same time
+         checkStatus( controller.addWaypoint(ann("Edinburgh Castle\n")) );     
+         
+         checkOutput(1, 0, new Chunk.CreateHeader("Old Town", 1,  1));
+   
+         controller.setLocation(0, 2);
+                
+         checkStatusNotOK( controller.addWaypoint(ann("Holyrood Palace\n")) );
+
+         checkStatus( controller.endNewTour() );
+    	
+    }
+    
+
+    @Test
+    public void testendTourTwice() {
+    	//JUnit test to check if Status is not OK when two a tour is ended twice.
+    	
+    	 addOnePointTour();
+         
+         checkStatusNotOK( controller.endNewTour() );
+    	
+    }
+    
+    @Test
+    public void teststartTourTwice() {
+    	//JUnit test to check if Status is not OK when two a tour is created twice.
+    	
+    	 checkStatus( controller.startNewTour(
+                 "T4", 
+                 "Botanical Gardens", 
+                 ann("The Botanical Gardems of Edinburgh\n"))
+                 );
+    	 checkStatusNotOK( controller.startNewTour(
+                 "T5", 
+                 "Princes Street", 
+                 ann("The high street of the New Town\n"))
+                 );
+    	
+    }
+    
+    @Test
+    public void testaddLegTwice() {
+    	//JUnit test to check if Status is not OK when two two legs are added consecutively.
+    	
+    	 checkStatus( controller.startNewTour(
+                 "T4", 
+                 "Botanical Gardens", 
+                 ann("The Botanical gardens of Edinburgh\n"))
+                 );
+    	 checkStatus( controller.addWaypoint(ann("Princes Street\n")) );     
+           
+         checkOutput(1, 0, new Chunk.CreateHeader("Botanical Gardens", 1,  1));
+     
+         checkStatus( controller.addLeg(ann("St Andrews square\n")) );
+     
+         checkStatusNotOK( controller.addLeg(ann("National Gallery\n")) );
+         
+    }
+    
+  
+    @Test
+    public void testnoWaypoint() {
+    	//JUit test to check if Status is not OK if user tries to follw tour without adding waypoints 
+    	logger.info(makeBanner("TwoWaypointsClose"));
+    	
+    	 checkStatus(
+                 controller.startNewTour("T2", "Old Town", ann("From Edinburgh Castle to Holyrood\n"))
+                 );
+         
+         checkStatusNotOK(controller.followTour("T2"));
+         
+         checkStatusNotOK( controller.endNewTour() );
+         
+    }
+    
+    
+    
+    @Test
+    public void testendsinLeg() {
+    	//JUnit test to check if Status raises an error if the end point is a leg and not a waypoint
+    	 checkStatus( controller.startNewTour(
+                 "T1", 
+                 "Informatics at UoE", 
+                 ann("The Informatics Forum and Appleton Tower\n"))
+                 );
+         
+         checkOutput(1, 0, new Chunk.CreateHeader("Informatics at UoE", 0,  0));
+       
+         controller.setLocation(300, -500);
+   
+         checkStatus( controller.addLeg(ann("Start at NE corner of George Square\n")) );
+        
+         checkOutput(1, 0, new Chunk.CreateHeader("Informatics at UoE", 1,  0));
+         
+         checkStatusNotOK(controller.followTour("T1"));
+    	
+    }
+    
+    @Test
+    public void testfollowWhenCreate() {
+    	//JUnit test to check if Status is not OK if user decides to follow a tour when in create mode
+    	 checkStatus( controller.startNewTour(
+                 "T4", 
+                 "Botanical Gardens", 
+                 ann("The Botanical gardens of Edinburgh\n"))
+                 );
+    	 checkStatus( controller.addWaypoint(ann("Princes Street\n")) );  
+    	 
+    	 checkStatusNotOK( controller.followTour("T4"));
+    	
+    }
+   
+    
+  
+    
 }
