@@ -40,7 +40,7 @@ public class ControllerImp implements Controller {
         this.stage = 0;
         this.browseDetails = false;
         this.waypointRadius = waypointRadius;
-        this.waypointSeparation = waypointSeparation;     
+        this.waypointSeparation = waypointSeparation;
     }
 
     //--------------------------
@@ -55,6 +55,7 @@ public class ControllerImp implements Controller {
         logger.fine(startBanner("startNewTour"));
         if (mode == Mode.BrowseTours && !browseDetails){
             mode = Mode.CreateTour;
+            logger.finest("Entering Create Tour mode");
             tour = new Tour(id,title,annotation);
             return Status.OK;
         }
@@ -65,8 +66,11 @@ public class ControllerImp implements Controller {
     public Status addWaypoint(Annotation ann) {
         logger.fine(startBanner("addWaypoint"));
         if (mode == Mode.CreateTour) {
-            if (tour.getNumberOfWaypoints() > 0 && (loc.deltaFrom(currWaypoint.location).distance()) <= waypointSeparation) {
-                return new Status.Error("Cannot add adjacent waypoints so close together");
+            if (tour.getNumberOfWaypoints() > 0) {
+                logger.finer("Check if waypoints aren't too close together");
+                if ((loc.deltaFrom(currWaypoint.location).distance()) <= waypointSeparation) {
+                    return new Status.Error("Cannot add adjacent waypoints so close together");
+                }
             }
             if (tour.getNumberOfWaypoints() == tour.getNumberOfLegs()){
                 tour.addLeg(Annotation.getDefault());
@@ -103,10 +107,11 @@ public class ControllerImp implements Controller {
             if (tour.getNumberOfWaypoints() == tour.getNumberOfLegs()) {
                 lib.addTour(tour);
                 mode = Mode.BrowseTours;
+                logger.finest("Entering Browse Tours mode");
                 browseDetails = false;
                 return Status.OK;
             } else {
-                return new Status.Error("A tour must the same amount of waypoints than legs");
+                return new Status.Error("A tour must have the same amount of waypoints and legs");
             }
         }
         return new Status.Error("Cannot end a tour while not in create tour mode");
@@ -159,6 +164,7 @@ public class ControllerImp implements Controller {
                 return new Status.Error("Unrecognized tour");
             }
             mode = Mode.FollowTour;
+            logger.finest("Entering Follow Tour mode");
             tour = lib.get_tour_lib().get(id);
             return Status.OK;
         }
@@ -168,6 +174,7 @@ public class ControllerImp implements Controller {
     public Status endSelectedTour() {
         if (mode == Mode.FollowTour){
             mode = Mode.BrowseTours;
+            logger.finest("Entering Browse Tours mode");
             browseDetails = false;
             return Status.OK;
         }
@@ -179,6 +186,7 @@ public class ControllerImp implements Controller {
     //--------------------------
     @Override
     public void setLocation(double easting, double northing) {
+        logger.fine(startBanner("setLocation"));
         loc = new Location(easting, northing);
         if (mode == Mode.FollowTour) {
             if (stage < tour.getNumberOfWaypoints()) {
@@ -198,11 +206,9 @@ public class ControllerImp implements Controller {
     public List<Chunk> getOutput() {
     	List<Chunk> chunk_list = new ArrayList<Chunk>();
     	if (mode == Mode.CreateTour) {
-            logger.fine(startBanner("getOutputCreateTour"));
     		chunk_list.add(new Chunk.CreateHeader(tour.title, tour.getNumberOfLegs(), tour.getNumberOfWaypoints()));
     	}
     	if (mode == Mode.FollowTour) {
-            logger.fine(startBanner("getOutputFollowTour"));
     		chunk_list.add(new Chunk.FollowHeader(tour.title, stage, tour.getNumberOfWaypoints()));
     		if (stage != 0) {
                 if (tour.getWaypoint(stage - 1).near(loc)) {
@@ -221,7 +227,6 @@ public class ControllerImp implements Controller {
     		LinkedHashMap<String,Tour> tour_lib;
     		if (!browseDetails) {
                 Chunk.BrowseOverview browse_tours = new Chunk.BrowseOverview();
-                logger.fine(startBanner("getOutputTourOverview"));
                 tour_lib = lib.get_tour_lib();
                 for (Map.Entry<String, Tour> entry : tour_lib.entrySet()) {
                     browse_tours.addIdAndTitle(entry.getKey(), entry.getValue().title);
@@ -229,7 +234,6 @@ public class ControllerImp implements Controller {
                 chunk_list.add(browse_tours);
     		}
     		else {
-                logger.fine(startBanner("getOutputBrowseDetails"));
     			chunk_list.add(new Chunk.BrowseDetails(tour.id, tour.title, tour.annotation));
     		}
     	}

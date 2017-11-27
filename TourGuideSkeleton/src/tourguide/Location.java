@@ -1,9 +1,13 @@
 package tourguide;
 
+import java.util.logging.Logger;
+
 public class Location {
+	private static Logger logger = Logger.getLogger("tourguide");
 	public double easting;
 	public double northing;
 	Location(double e, double n){
+		logger.finer("East: " + e + "  North: "  + n);
 		easting = e;
 		northing = n;
 	}
