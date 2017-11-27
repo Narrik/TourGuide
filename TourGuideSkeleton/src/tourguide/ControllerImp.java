@@ -121,8 +121,8 @@ public class ControllerImp implements Controller {
                 logger.finer("Entering Browse Tours mode, tour overview submode");
                 return Status.OK;
             } else {
-                logger.warning("A tour must have the same amount of waypoints and legs");
-                return new Status.Error("A tour must have the same amount of waypoints and legs");
+                logger.warning("The tour must end with a waypoint");
+                return new Status.Error("The tour must end with a waypoint");
             }
         }
         logger.warning("Cannot end a tour while not in create a tour mode");
